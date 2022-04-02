@@ -1,4 +1,4 @@
-// SurfaceFlowSimulator.cpp : ¶¨Òå¿ØÖÆÌ¨Ó¦ÓÃ³ÌĞòµÄÈë¿Úµã¡£
+// SurfaceFlowSimulator.cpp : å®šä¹‰æ§åˆ¶å°åº”ç”¨ç¨‹åºçš„å…¥å£ç‚¹ã€‚
 //
 
 #include "stdafx.h"
@@ -26,11 +26,11 @@
 #endif
 
 
-// Î¨Ò»µÄÓ¦ÓÃ³ÌĞò¶ÔÏó
+// å”¯ä¸€çš„åº”ç”¨ç¨‹åºå¯¹è±¡
 
 CWinApp theApp;
 
-//´ÓÑÕÉ«±íÖĞ²éÕÒcolDateµÄÑÕÉ«Öµ¡£
+//ä»é¢œè‰²è¡¨ä¸­æŸ¥æ‰¾colDateçš„é¢œè‰²å€¼ã€‚
 void GetOneColor(std::vector<colorTable>& colors, float colDate, BYTE& colorR, BYTE& colorG, BYTE& colorB)
 {
 	for (int i = 0; i < colors.size(); i++)
@@ -52,7 +52,7 @@ void GetOneColor(std::vector<colorTable>& colors, float colDate, BYTE& colorR, B
 	}
 }
 
-//»æÖÆÒ»¸öÓêµÎµ¥ÔªµãrunPntÔÚBMPÎ»Í¼ÖĞµÄ±íÏÖpOutColor£¬²¢ĞŞ¸Ä¶ÔÓ¦Õ¤¸ñµÄ¼ÆÊıpOutNum¡£(ÒÔÓêµÎÊµ¼ÊµÄÁ÷Á¿½øĞĞÀÛ¼Ó)
+//ç»˜åˆ¶ä¸€ä¸ªé›¨æ»´å•å…ƒç‚¹runPntåœ¨BMPä½å›¾ä¸­çš„è¡¨ç°pOutColorï¼Œå¹¶ä¿®æ”¹å¯¹åº”æ …æ ¼çš„è®¡æ•°pOutNumã€‚(ä»¥é›¨æ»´å®é™…çš„æµé‡è¿›è¡Œç´¯åŠ )
 void   DrawOnePoint(point3D& runPnt, int imgWidth, int imgHeight, double dx, double dy, double Xmin, double Ymax, float RVal,
 	BYTE* pOutColor, std::vector<colorTable>& colors, float* pOutNum)
 {
@@ -71,13 +71,13 @@ void   DrawOnePoint(point3D& runPnt, int imgWidth, int imgHeight, double dx, dou
 	BYTE colorR = 0, colorG = 0, colorB = 255;
 	GetOneColor(colors, pOutNum[(imgHeight - row)*imgWidth + col], colorR, colorG, colorB);
 
-	pOutColor[3 * ((row)*imgWidth + col) + 0] = colorG;   //RÑÕÉ«  Ò²ĞíºóÃæÊÇGRB
-	pOutColor[3 * ((row)*imgWidth + col) + 1] = colorR;   //GÑÕÉ«
-	pOutColor[3 * ((row)*imgWidth + col) + 2] = colorB;   //BÑÕÉ«
+	pOutColor[3 * ((row)*imgWidth + col) + 0] = colorG;   //Ré¢œè‰²  ä¹Ÿè®¸åé¢æ˜¯GRB
+	pOutColor[3 * ((row)*imgWidth + col) + 1] = colorR;   //Gé¢œè‰²
+	pOutColor[3 * ((row)*imgWidth + col) + 2] = colorB;   //Bé¢œè‰²
 
 }
 
-//¼ÆËãÓêµÎµÄÑÕÉ«±ä»¯±í
+//è®¡ç®—é›¨æ»´çš„é¢œè‰²å˜åŒ–è¡¨
 void SetColorTable(BSTR colorTableName, std::vector<colorTable>& colors)
 {
 	CString strcolTableName(colorTableName);
@@ -88,7 +88,7 @@ void SetColorTable(BSTR colorTableName, std::vector<colorTable>& colors)
 	if (!infile.Open(strcolTableName, CFile::modeRead))
 		return;
 
-	//»ñµÃÑÕÉ«ÊıÄ¿
+	//è·å¾—é¢œè‰²æ•°ç›®
 	CString strLine, out[5];
 	infile.ReadString(strLine);
 
@@ -147,25 +147,25 @@ void writeImg(std::string fileName, std::shared_ptr<float> img, int width, int h
 	pDataset->SetGeoTransform(geoTransform);
 	GDALRasterBand *pBand = pDataset->GetRasterBand(1);
 
-	//pBand->SetNoDataValue((double)-9999.0);  //ÉèÖÃ²¨¶ÎµÄÎŞĞ§Öµ£¬ÕâÀïÉèÖÃÓ°Ïñ=invalidValÎªÎŞĞ§Öµ¡£
+	//pBand->SetNoDataValue((double)-9999.0);  //è®¾ç½®æ³¢æ®µçš„æ— æ•ˆå€¼ï¼Œè¿™é‡Œè®¾ç½®å½±åƒ=invalidValä¸ºæ— æ•ˆå€¼ã€‚
 	pBand->RasterIO(GF_Write, 0, 0, width, height, img.get(), width, height, GDT_Float32, 0, 0);
-	double min = 0, max = 0, mean = 0, dev = 0; //ÉèÖÃµÄÓ°ÏñµÄ×î´óÖµºÍ×îĞ¡Öµ¡£
+	double min = 0, max = 0, mean = 0, dev = 0; //è®¾ç½®çš„å½±åƒçš„æœ€å¤§å€¼å’Œæœ€å°å€¼ã€‚
 	pBand->ComputeStatistics(FALSE, &min, &max, &mean, &dev, NULL, NULL);
 
 	GDALClose(pDataset);
 }
 
-//±£´æBMPÓ°ÏñÊı¾İ¡£·µ»ØTrueËµÃ÷±£´æ³É¹¦£¬·ñÔò±£´æÊ§°Ü¡£
-//ImgName ¡ª¡ª ÊäÈëÓ°ÏñµÄÂ·¾¶£»
-//imgWidth,imgHeight ¡ª¡ª Ó°ÏñµÄ¿í¡¢¸ß£»
-//BmpHeader ¡ª¡ª Ó°ÏñµÄÎÄ¼şÍ·ĞÅÏ¢£»
-//BmpInfo ¡ª¡ª Ó°ÏñµÄÎÄ¼şĞÅÏ¢£»
-//pBuffer ¡ª¡ª Ó°ÏñµÄ¸÷¸öÏñËØÖµ¡£BYTE[3*imgWidth*imgHeight]
+//ä¿å­˜BMPå½±åƒæ•°æ®ã€‚è¿”å›Trueè¯´æ˜ä¿å­˜æˆåŠŸï¼Œå¦åˆ™ä¿å­˜å¤±è´¥ã€‚
+//ImgName â€”â€” è¾“å…¥å½±åƒçš„è·¯å¾„ï¼›
+//imgWidth,imgHeight â€”â€” å½±åƒçš„å®½ã€é«˜ï¼›
+//BmpHeader â€”â€” å½±åƒçš„æ–‡ä»¶å¤´ä¿¡æ¯ï¼›
+//BmpInfo â€”â€” å½±åƒçš„æ–‡ä»¶ä¿¡æ¯ï¼›
+//pBuffer â€”â€” å½±åƒçš„å„ä¸ªåƒç´ å€¼ã€‚BYTE[3*imgWidth*imgHeight]
 bool SaveBMP(CString strImgName, int imgWidth, int imgHeight, BITMAPFILEHEADER& BmpHeader, BITMAPINFO& BmpInfo, BYTE *pBuffer)
 {
 	CFile outfile;
 	outfile.Open(strImgName, CFile::modeCreate | CFile::modeWrite);
-	outfile.Write((LPSTR)&BmpHeader, sizeof(BmpHeader)); //Ê×ÏÈ¶ÁÎÄ¼şÍ·²¿·Öµ½BmpHeaderÖĞ¡£
+	outfile.Write((LPSTR)&BmpHeader, sizeof(BmpHeader)); //é¦–å…ˆè¯»æ–‡ä»¶å¤´éƒ¨åˆ†åˆ°BmpHeaderä¸­ã€‚
 	outfile.Write(&BmpInfo, sizeof(BITMAPINFO));
 	outfile.Write(pBuffer, 3 * imgWidth*imgHeight);
 
@@ -176,19 +176,19 @@ bool SaveBMP(CString strImgName, int imgWidth, int imgHeight, BITMAPFILEHEADER& 
 }
 
 
-//»æÖÆÒ»¸öÊ±¼ä¶ÎµÄÒÑÖª²úÁ÷Êı¾İµÄ»ãÁ÷¹ı³ÌÄ£Äâ£¬ÔÚTINµÄ»ù´¡ÉÏ»æÖÆ(ÒÑÖªÇøÓòµÄÒ»¸öË®ÉîÎÄ¼şºÍÁ÷Óò³ö¿ÚµãµÄ×ø±ê)
-//inTINName¡ªÊäÈëTIN ÎÄ¼ş
-//inDEMName¡ªÊäÈëÓÃÓÚ»ñÈ¡½µÓêÔ´µãµÄDEMÎÄ¼ş
-//inRunoffDirName¡ª ÊäÈëÃ¿Ò»Ê±¼ä¶ÎµÄ²úÁ÷Êı¾İ*.imgÓ°ÏñÄ¿Â¼
-//inBackBMPName¡ªÎªÖ¸¶¨µÄ±³¾°BMPÍ¼Æ¬£¬Éú³ÉµÄFlowTrackÊÇÔÚ¸Ã±³¾°Í¼Æ¬ÉÏ»æÖÆ
-//inColorTableName¡ªÖ¸¶¨ÑÕÉ«±íµÄÎÄ±¾ÎÄ¼ş£¬¸ù¾İÓêµÎµÄ¶àÉÙ»æÖÆ²»Í¬µÄÑÕÉ«
-//inFirstDayDepthNameÒ»ÂüÄş¹«Ê½ÖĞÓÃµ½µÄË®Á¦°ë¾¶water flow depth
-//inManingIndDataÒ»ÂüÄş¹«Ê½ÖĞÓÃµ½ÂüÄşÏµÊı£¬ÈçN=0.04
-//intelTimeData¡ª²úÁ÷Êı¾İµÄ¼ä¸ôÊ±¼ä£¬ÒÔÃëÎªµ¥Î»£¬Èç86400Ãë£¨Ò»ÌìÊ±¼ä£©
-//endTimeData¡ªÖ¸¶¨¶à³¤Ê±¼ä½áÊøÕû¸öÁ÷Óò»æÖÆ³ÉÍ¼Ïñ¹ı³Ì£¬ÒÔÌìÎªµ¥Î»
-//(outPntXData, outPntYData,outPntZData)¡ªÖ¸¶¨µÄÁ÷Óò³ö¿ÚµãµÄ×ø±ê£¬¸ÃÁ÷Óò³ö¿Úµã½«¼ÓÈëµ½¹¹½¨µÄÃ¿Ò»ÌõÁ÷Ë®ÏßµÄ×îºóÒ»µã
-//outFlowBMPName¡ªÉú³ÉÃ¿Ò»Ê±¿Ì¾ßÓĞÑÕÉ«·ÖÀàµÄ±³¾°Í¼
-//outFlowDischargeName¡ªÉú³ÉÎÄ¼ş±£´æÃ¿¸öÕ¤¸ñÔÚÖ¸¶¨Ê±¿ÌµÄ»ãÁ÷Á¿
+//ç»˜åˆ¶ä¸€ä¸ªæ—¶é—´æ®µçš„å·²çŸ¥äº§æµæ•°æ®çš„æ±‡æµè¿‡ç¨‹æ¨¡æ‹Ÿï¼Œåœ¨TINçš„åŸºç¡€ä¸Šç»˜åˆ¶(å·²çŸ¥åŒºåŸŸçš„ä¸€ä¸ªæ°´æ·±æ–‡ä»¶å’ŒæµåŸŸå‡ºå£ç‚¹çš„åæ ‡)
+//inTINNameâ€”è¾“å…¥TIN æ–‡ä»¶
+//inDEMNameâ€”è¾“å…¥ç”¨äºè·å–é™é›¨æºç‚¹çš„DEMæ–‡ä»¶
+//inRunoffDirNameâ€” è¾“å…¥æ¯ä¸€æ—¶é—´æ®µçš„äº§æµæ•°æ®*.imgå½±åƒç›®å½•
+//inBackBMPNameâ€”ä¸ºæŒ‡å®šçš„èƒŒæ™¯BMPå›¾ç‰‡ï¼Œç”Ÿæˆçš„FlowTrackæ˜¯åœ¨è¯¥èƒŒæ™¯å›¾ç‰‡ä¸Šç»˜åˆ¶
+//inColorTableNameâ€”æŒ‡å®šé¢œè‰²è¡¨çš„æ–‡æœ¬æ–‡ä»¶ï¼Œæ ¹æ®é›¨æ»´çš„å¤šå°‘ç»˜åˆ¶ä¸åŒçš„é¢œè‰²
+//inFirstDayDepthNameä¸€æ›¼å®å…¬å¼ä¸­ç”¨åˆ°çš„æ°´åŠ›åŠå¾„water flow depth
+//inManingIndDataä¸€æ›¼å®å…¬å¼ä¸­ç”¨åˆ°æ›¼å®ç³»æ•°ï¼Œå¦‚N=0.04
+//intelTimeDataâ€”äº§æµæ•°æ®çš„é—´éš”æ—¶é—´ï¼Œä»¥ç§’ä¸ºå•ä½ï¼Œå¦‚86400ç§’ï¼ˆä¸€å¤©æ—¶é—´ï¼‰
+//endTimeDataâ€”æŒ‡å®šå¤šé•¿æ—¶é—´ç»“æŸæ•´ä¸ªæµåŸŸç»˜åˆ¶æˆå›¾åƒè¿‡ç¨‹ï¼Œä»¥å¤©ä¸ºå•ä½
+//(outPntXData, outPntYData,outPntZData)â€”æŒ‡å®šçš„æµåŸŸå‡ºå£ç‚¹çš„åæ ‡ï¼Œè¯¥æµåŸŸå‡ºå£ç‚¹å°†åŠ å…¥åˆ°æ„å»ºçš„æ¯ä¸€æ¡æµæ°´çº¿çš„æœ€åä¸€ç‚¹
+//outFlowBMPNameâ€”ç”Ÿæˆæ¯ä¸€æ—¶åˆ»å…·æœ‰é¢œè‰²åˆ†ç±»çš„èƒŒæ™¯å›¾
+//outFlowDischargeNameâ€”ç”Ÿæˆæ–‡ä»¶ä¿å­˜æ¯ä¸ªæ …æ ¼åœ¨æŒ‡å®šæ—¶åˆ»çš„æ±‡æµé‡
 int FlowDischarge(BSTR inTINName, BSTR inDEMName, BSTR inRunoffDirName, BSTR inBackBMPName, BSTR inColorTableName,
 	BSTR inFirstDayDepthName, double inManingIndData, BSTR inTWIName, BSTR inLName, BSTR inCName, BSTR inSName, double intelTimeData, double endTimeData, double outPntXData,
 	double outPntYData, double outPntZData, BSTR outFlowBMPName, BSTR outFlowDischargeName)
@@ -203,7 +203,7 @@ int FlowDischarge(BSTR inTINName, BSTR inDEMName, BSTR inRunoffDirName, BSTR inB
 		return 0;
 	}
 
-	//´ò¿ª²ÉÑù½µÓêÔ´µãµÄDEMÓ°Ïñ
+	//æ‰“å¼€é‡‡æ ·é™é›¨æºç‚¹çš„DEMå½±åƒ
 	CComBase comBase;
 	int imgDEMWidth = 0, imgDEMHeight = 0;
 	double dx = 0, dy = 0, Xmin = 0, Ymax = 0;
@@ -212,40 +212,40 @@ int FlowDischarge(BSTR inTINName, BSTR inDEMName, BSTR inRunoffDirName, BSTR inB
 	}
 	double geoTransform[6]{Xmin, dx, 0, Ymax, 0, -dy};
 
-	//´ò¿ªTWIÓ°Ïñ
+	//æ‰“å¼€TWIå½±åƒ
 	float *pTWI = new float[imgDEMWidth*imgDEMHeight];
 	if (!comBase.OpenImg(inTWIName, imgDEMWidth, imgDEMHeight, dx, dy, Xmin, Ymax, pTWI))
 	{
 		return FALSE;
 	}
 
-	//´ò¿ªLÓ°Ïñ
+	//æ‰“å¼€Lå½±åƒ
 	float *pL = new float[imgDEMWidth*imgDEMHeight];
 	if (!comBase.OpenImg(inLName, imgDEMWidth, imgDEMHeight, dx, dy, Xmin, Ymax, pL))
 		return FALSE;
 
-	//´ò¿ªCÓ°Ïñ
+	//æ‰“å¼€Cå½±åƒ
 	float *pC = new float[imgDEMWidth*imgDEMHeight];
 	if (!comBase.OpenImg(inCName, imgDEMWidth, imgDEMHeight, dx, dy, Xmin, Ymax, pC))
 		return FALSE;
 
-	//´ò¿ªSÓ°Ïñ
+	//æ‰“å¼€Så½±åƒ
 	float *pS = new float[imgDEMWidth*imgDEMHeight];
 	if (!comBase.OpenImg(inSName, imgDEMWidth, imgDEMHeight, dx, dy, Xmin, Ymax, pS))
 		return FALSE;
 
 
-	//¶ÁÈ¡TINºÍ½µÓêÔ´µãµÄDEMÉú³É¾²Ì¬µÄFlowTrack(polylines)
+	//è¯»å–TINå’Œé™é›¨æºç‚¹çš„DEMç”Ÿæˆé™æ€çš„FlowTrack(polylines)
 	TIN2Flow tin;
 	if (!tin.CreateFlow(strTINName, inDEMName)) {
 		return 0;
 	}
- 	std::vector<polyline3D> polylines; //ÕâÀïÃ¿Ò»¸öÆğÊ¼µãĞÎ³ÉµÄÁ÷ÓòÏß¿´×÷Ò»¸öpolyline3D,ÆäÖĞpolyline3DµÄ×ø±ê´®ÊÇÔÚinteltimeÊ±¼ä¼ä¸ôÊ±Éú³ÉµÄ×ø±êµã¡£
+ 	std::vector<polyline3D> polylines; //è¿™é‡Œæ¯ä¸€ä¸ªèµ·å§‹ç‚¹å½¢æˆçš„æµåŸŸçº¿çœ‹ä½œä¸€ä¸ªpolyline3D,å…¶ä¸­polyline3Dçš„åæ ‡ä¸²æ˜¯åœ¨inteltimeæ—¶é—´é—´éš”æ—¶ç”Ÿæˆçš„åæ ‡ç‚¹ã€‚
  	tin.CalFlowPnts(intelTimeData, polylines, strFirstDayDepth, inManingIndData, pTWI, pL, pC, pS, outPntXData, outPntYData, outPntZData);
 
-	//´ò¿ªBMP±³¾°Ó°Ïñ
-	BITMAPFILEHEADER BmpHeader; //¼ÇÂ¼"Bmp"¸ñÊ½Í¼ÏóµÄÍ·ĞÅÏ¢
-	BITMAPINFO BmpInfo;			//¼ÇÂ¼"Bmp"¸ñÊ½Í¼ÏóµÄĞÅÏ¢
+	//æ‰“å¼€BMPèƒŒæ™¯å½±åƒ
+	BITMAPFILEHEADER BmpHeader; //è®°å½•"Bmp"æ ¼å¼å›¾è±¡çš„å¤´ä¿¡æ¯
+	BITMAPINFO BmpInfo;			//è®°å½•"Bmp"æ ¼å¼å›¾è±¡çš„ä¿¡æ¯
 	int imgWidth = 0, imgHeight = 0;
 	if (!comBase.OpenBMP(inBackBMPName, imgWidth, imgHeight, BmpHeader, BmpInfo)) {
 		return 0;
@@ -256,20 +256,20 @@ int FlowDischarge(BSTR inTINName, BSTR inDEMName, BSTR inRunoffDirName, BSTR inB
 		return 0;
 	}
 
-	//ÉèÖÃÓêµÎÑÕÉ«±í
+	//è®¾ç½®é›¨æ»´é¢œè‰²è¡¨
 	std::vector<colorTable>  colTables;
 	SetColorTable(inColorTableName, colTables);
 
-	//¼ÆËãÉú³ÉµÄBMPÓ°ÏñÖµ
+	//è®¡ç®—ç”Ÿæˆçš„BMPå½±åƒå€¼
 	const char* cEvenTime = "0000";
 	CString eveTime(cEvenTime);
 
-	//¼ÇÂ¼Ã¿Ò»Ê±¿Ì£¬¸÷¸öµãÓĞ¼¸µÎÓêrainIdx[i].size()£¬¸÷¸öÓêµÎµÄÎ»ÒÆÁ¿(rainIdx[i])[j]£¬¼´polylines[i]ÖĞµÄidxÖµ
+	//è®°å½•æ¯ä¸€æ—¶åˆ»ï¼Œå„ä¸ªç‚¹æœ‰å‡ æ»´é›¨rainIdx[i].size()ï¼Œå„ä¸ªé›¨æ»´çš„ä½ç§»é‡(rainIdx[i])[j]ï¼Œå³polylines[i]ä¸­çš„idxå€¼
 	int rainEndtime = comBase.OpenDirfile(inRunoffDirName);
 	if (rainEndtime < 1) return 0;
 	int plineNum = polylines.size();
-	intArray*    rainIdx = new intArray[plineNum];    //rainIdxÊÇÒ»¸ö¶şÎ¬±äÁ¿£¬¼´rainIdx[plineNum][n]¡£ÆäÖĞ(rainIdx[plineNum])±íÊ¾Ã¿Ò»ÌõÁ÷Ë®ÏßÉÏ¼ÇÂ¼µÄ¶à¸öÓêµÎ´®¡£(rainIdx[plineNum])[n]¼ÇÂ¼Ò»ÌõÁ÷Ë®ÏßÉÏµÄµÚn¸öÓêµÎÁ÷µ½ÄÄÒ»¸ö½ÚµãµÄÏÂ±ê£¬¸ÃÏÂ±ê´Ó0¿ªÊ¼(Á÷Ë®ÏßÖĞµÚÒ»¸ö½Úµã¿ªÊ¼)£¬Ã¿×ßÒ»¸öÊ±¼ä¼ä¸ôinteltime£¬ÏÂ±êÊı+1¡£
-	floatArray*  pflowVal = new floatArray[plineNum]; //pflowValÊÇÒ»¸ö¶şÎ¬±äÁ¿£¬¼´pflowVal[plineNum][n]£¬ÓërainIdxÒ»Ò»¶ÔÓ¦£¬¼ÇÂ¼¸÷¸öÓêµÎµÄ²úÁ÷Á¿ĞÅÏ¢¡£
+	intArray*    rainIdx = new intArray[plineNum];    //rainIdxæ˜¯ä¸€ä¸ªäºŒç»´å˜é‡ï¼Œå³rainIdx[plineNum][n]ã€‚å…¶ä¸­(rainIdx[plineNum])è¡¨ç¤ºæ¯ä¸€æ¡æµæ°´çº¿ä¸Šè®°å½•çš„å¤šä¸ªé›¨æ»´ä¸²ã€‚(rainIdx[plineNum])[n]è®°å½•ä¸€æ¡æµæ°´çº¿ä¸Šçš„ç¬¬nä¸ªé›¨æ»´æµåˆ°å“ªä¸€ä¸ªèŠ‚ç‚¹çš„ä¸‹æ ‡ï¼Œè¯¥ä¸‹æ ‡ä»0å¼€å§‹(æµæ°´çº¿ä¸­ç¬¬ä¸€ä¸ªèŠ‚ç‚¹å¼€å§‹)ï¼Œæ¯èµ°ä¸€ä¸ªæ—¶é—´é—´éš”inteltimeï¼Œä¸‹æ ‡æ•°+1ã€‚
+	floatArray*  pflowVal = new floatArray[plineNum]; //pflowValæ˜¯ä¸€ä¸ªäºŒç»´å˜é‡ï¼Œå³pflowVal[plineNum][n]ï¼Œä¸rainIdxä¸€ä¸€å¯¹åº”ï¼Œè®°å½•å„ä¸ªé›¨æ»´çš„äº§æµé‡ä¿¡æ¯ã€‚
 
 	std::vector<std::thread> bmpThreads;
 	std::vector<std::thread> imgThreads;
@@ -311,12 +311,12 @@ int FlowDischarge(BSTR inTINName, BSTR inDEMName, BSTR inRunoffDirName, BSTR inB
 	ImgCacher cacher(imgDEMWidth, imgDEMHeight, (int)endTimeData, inRunoffDirName);
 
 	for (int t = 0; t < endTimeData; t += 1) {
-		//»æÖÆ±³¾°
+		//ç»˜åˆ¶èƒŒæ™¯
 		cudaMemcpy(gpuOutColor, pInColor, 3 * imgWidth * imgHeight * sizeof(BYTE), cudaMemcpyHostToDevice);
 
-		//½«ĞÂ²úÉúµÄÓêµÎ¼ÓÈëµ½rainidx[i]ÖĞ
+		//å°†æ–°äº§ç”Ÿçš„é›¨æ»´åŠ å…¥åˆ°rainidx[i]ä¸­
 		if (t < rainEndtime) {
-			//µÃµ½²úÁ÷ĞÅÏ¢
+			//å¾—åˆ°äº§æµä¿¡æ¯
 			std::shared_ptr<float> prval = cacher.getImages(t);
 			cudaMemcpy(gpuRVal, prval.get(), sizeof(float) * imgDEMWidth * imgDEMHeight, cudaMemcpyHostToDevice);
 
@@ -324,7 +324,7 @@ int FlowDischarge(BSTR inTINName, BSTR inDEMName, BSTR inRunoffDirName, BSTR inB
 				gpuRVal, imgDEMWidth, gpuRainIdx, gpuFlowVal, plineNum, endTime, gpuRainIdxLen);
 		}
 
-		//»æÖÆÓêµÎ
+		//ç»˜åˆ¶é›¨æ»´
 		cudaMemset(gpuOutNum, 0, sizeof(float) * imgWidth * imgHeight);
 
 		runDrawPoints(gpuFlowTracks, gpuFlowTracksSizes, gpuFlowTrackSize, gpuRainIdx, gpuFlowVal, plineNum,
@@ -371,7 +371,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 
 	double inManingInd = 0.04;
 
-	//Ä£ÄâÈÕÁ÷Á¿
+	//æ¨¡æ‹Ÿæ—¥æµé‡
 	double intelTime = 3015; 
 	double endTime = 2;
 	double outPntX = 596234.836;
@@ -397,15 +397,6 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 	FlowDischarge(inTIN, inDEM, inRunoffDir, inBackBMP, inColorTable, inFirstDayDepth,
 		inManingInd, inTWI, inL, inC, inS, intelTime, endTime, outPntX, outPntY, outPntZ, outFlowBMP, outFlowDischarge);
 	endtime = clock();
-
-	//for (intelTime = 2643.0; intelTime <= 3600.0; intelTime += 1.0) {
-	//	wchar_t outFlowDischarge[256] = { 0 };
-	//	swprintf(outFlowDischarge, L".\\Flow30N\\%d_", (int)intelTime);
-
-	//	FlowDischarge(inTIN, inDEM, inRunoffDir, inBackBMP, inColorTable, inFirstDayDepth,
-	//		inManingInd, inTWI, inL, inC, inS, intelTime, endTime, outPntX, outPntY, outPntZ, outFlowBMP, outFlowDischarge);
-	//	endtime = clock();
-	//}
 
 	time = double(endtime - begintime) / CLOCKS_PER_SEC;
 
