@@ -372,7 +372,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 	double inManingInd = 0.04;
 
 	//模拟日流量
-	double intelTime = 3015; 
+	double intelTime = 3600; 
 	double endTime = 2;
 	double outPntX = 596234.836;
 	double outPntY = 5216225.614;
