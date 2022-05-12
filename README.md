@@ -11,6 +11,6 @@ Visual Studio and CUDA8.0 are installed on a computer with the NVIDIA graphics c
  
 2)Setting the file directory of all the variables in the SurfaceFlowSimulator.cpp and the pre-defined parameters
   
-3)Modifing the variables "VSInstallDir" "CUDAInstallDir" "CUDASampleDir" "DOWNLOADFILE_PATH"  to the your path
+3)Modifing the variables "DOWNLOADFILE_PATH"  to the your path
 
 4)Running  and finally obtaining the 365 images with the daily surface flow discharge and a txt file recording the computing time
