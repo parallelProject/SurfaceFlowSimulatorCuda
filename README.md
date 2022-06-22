@@ -2,7 +2,7 @@
 Project for accurately and rapidly simulating the surface flow discharge
 
 # Run-time environment
-Visual Studio and CUDA are installed on a computer with the NVIDIA graphics card which the compute capability is 2.1 or above and a Windows operative systems.
+Visual Studio and CUDA are installed on a computer with the NVIDIA graphics card which the compute capability is 2.1 or above and a Windows operative system.
 
 #detail procedure of the parallel project
 
