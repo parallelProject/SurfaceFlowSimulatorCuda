@@ -43,10 +43,12 @@ class TIN2Flow
 	BOOL AddStartNode(std::vector<tin>& tinA, BSTR InDEM, std::vector<node*>& nodeA);
 
 	//向polylines中增加一条线段(两个点)之间的所有点
-	void AddOneToPline(polyline3D& pline, double X0, double Y0, double Z0, double X1, double Y1, double Z1, double& velocity, double& lefttime, double intelTime, double depth, double inManingInd, double Xmin, double Ymax, int imgWidth, int dx, int dy, float *pTWI, float *pL, float *pC, float *pS);
+	//void AddOneToPline(polyline3D& pline, double X0, double Y0, double Z0, double X1, double Y1, double Z1, double& velocity, double& lefttime, double intelTime, double depth, double inManingInd, double Xmin, double Ymax, int imgWidth, int dx, int dy, float *pTWI, float *pL, float *pC, float *pS);
+	void AddOneToPline(polyline3D& pline, double X0, double Y0, double Z0, double X1, double Y1, double Z1, double& velocity, double& lefttime, double intelTime, double depth, double inManingInd, double Xmin, double Ymax, int imgWidth, int dx, int dy, float *pL, float *pC, float *pS);
 
 	//计算一条线段(两个点)之间的通过时间
-	double CalOneLineTime(double X0, double Y0, double Z0, double X1, double Y1, double Z1, double& velocity, double depth, double inManingInd, double Xmin, double Ymax, int imgWidth, int dx, int dy, float *pTWI, float *pL, float *pC, float *pS);
+	//double CalOneLineTime(double X0, double Y0, double Z0, double X1, double Y1, double Z1, double& velocity, double depth, double inManingInd, double Xmin, double Ymax, int imgWidth, int dx, int dy, float *pTWI, float *pL, float *pC, float *pS);
+	double CalOneLineTime(double X0, double Y0, double Z0, double X1, double Y1, double Z1, double& velocity, double depth, double inManingInd, double Xmin, double Ymax, int imgWidth, int dx, int dy, float *pL, float *pC, float *pS);
 
 public:
     TIN2Flow();
@@ -57,7 +59,8 @@ public:
 	BOOL CreateFlow(CString fin, BSTR InDEM);
 
 	//计算从starPnts开始的所有的FlowTrack的，在inteltime时间间隔的Track流域线plines。其中plines的坐标串是inteltime间隔时间计算出的坐标值
-	BOOL CalFlowPnts(double intelTimeData, std::vector<polyline3D>& polylines, CString strFirstDayDepth, double inManingIndData, float *pTWI, float *pL, float *pC, float *pS, double outPntXData, double outPntYData, double outPntZData);
+	//BOOL CalFlowPnts(double intelTimeData, std::vector<polyline3D>& polylines, CString strFirstDayDepth, double inManingIndData, float *pTWI, float *pL, float *pC, float *pS, double outPntXData, double outPntYData, double outPntZData);
+	BOOL CalFlowPnts(double intelTimeData, std::vector<polyline3D>& polylines, CString strFirstDayDepth, double inManingIndData, float *pL, float *pC, float *pS, double outPntXData, double outPntYData, double outPntZData);
 };
 
 #endif

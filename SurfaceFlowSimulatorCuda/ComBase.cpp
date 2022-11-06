@@ -100,10 +100,8 @@ BOOL  CComBase::bImgNameVerf(CString strImgName,CString& imgFormat,CString& strF
     
     imgFormat = GetImgFormat(strImgName);
     strFormat = GetGDALFormat(imgFormat);
-    /*if(imgFormat.CompareNoCase(_T"tif")!=0 && imgFormat.CompareNoCase("img")!=0)		*/
 	if(imgFormat!="tif" && imgFormat!="img")
 	{
-		//AfxMessageBox(_T("The image only support *.tif & *.img format. Please change the image name for " + strImgName + "!"));
 		printf("仅支持tif img格式。");
 		return FALSE;
 	}
@@ -144,12 +142,14 @@ BOOL  CComBase::CreateNewImg(CString strImgName, int imgWidth,int imgHeight,doub
         return FALSE;
 
     GDALDriverH hDriver = NULL;
-	hDriver = GDALGetDriverByName(strFormat);
+	const char* cStrFormat = CStringA(strFormat);
+	hDriver = GDALGetDriverByName(cStrFormat);
 	if( hDriver == NULL || GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATE, NULL ) == NULL )
 		return FALSE;
     
 	char **papszOptions = NULL;
-	GDALDataset *pDataset = (GDALDataset *)GDALCreate(hDriver,strImgName,imgWidth,imgHeight,1,GDT_Float32,papszOptions);
+	const char* cStrImgName = CStringA(strImgName);
+	GDALDataset *pDataset = (GDALDataset *)GDALCreate(hDriver, cStrImgName, imgWidth, imgHeight, 1, GDT_Float32, papszOptions);
 	double adfGeoTransform[6] = { Xmin, dx, 0, Ymax , 0, -dy };
 	pDataset->SetGeoTransform( adfGeoTransform );        
 	GDALRasterBand *pBand = pDataset->GetRasterBand(1);
@@ -159,7 +159,7 @@ BOOL  CComBase::CreateNewImg(CString strImgName, int imgWidth,int imgHeight,doub
     double min=0,max=0,mean=0,dev=0; //设置的影像的最大值和最小值。
 	pBand->ComputeStatistics(FALSE,&min,&max,&mean,&dev,NULL,NULL);
 
-	GDALDeleteDataset (hDriver, strImgName); 	
+	GDALDeleteDataset(hDriver, cStrImgName);
 	RELEASE(pDataset); 
 
     return TRUE;
@@ -171,9 +171,7 @@ BOOL  CComBase::CreateNewImg(CString strImgName, int imgWidth,int imgHeight,doub
 //imgWidth,imgHeight —— 返回影像的宽、高；
 BOOL  CComBase::OpenImg(BSTR ImgName, int& imgWidth, int& imgHeight)
 {
-	//printf("进入打开img函数 \n");
     CString strImgName(ImgName);
-	//printf("将imgname赋值给从string \n");
     if (strImgName.GetLength()<1)
 	{
 		printf("length小于1，返回FALSE \n");
@@ -183,21 +181,16 @@ BOOL  CComBase::OpenImg(BSTR ImgName, int& imgWidth, int& imgHeight)
     //打开DEM影像    
     GDALDataset *pImgDataset=NULL;
 	//此处有改动
-	//USES_CONVERSION;
-	//LPCSTR charImgName=T2A(strImgName);
-	//
+	USES_CONVERSION;
+	LPCSTR charImgName=T2A(strImgName);
 
-	//printf("下一句打开dem \n");
-	//printf(strImgName);
-	int len = strlen(strImgName);
+	int len = strlen(charImgName);
 	//printf("长度为：%d\n",len);
 	
 	//printf(strImgName);
-
-	pImgDataset = (GDALDataset *)GDALOpen(strImgName, GA_ReadOnly);
+	pImgDataset = (GDALDataset *)GDALOpen(charImgName, GA_ReadOnly);
 	if( pImgDataset == NULL ) 
 	{
-		//AfxMessageBox(_T("Image " + strImgName + " can't open!"));
 		printf("Image cannot open! here");
 		return FALSE;
 	}	
@@ -227,13 +220,12 @@ BOOL  CComBase::OpenImg(CString strImgName, int& imgWidth, int& imgHeight)
     GDALDataset *pImgDataset=NULL;
 	//此处有改动
 	//const char* charImgName=(char*)(LPCTSTR)strImgName;
-	//USES_CONVERSION;
-	//LPCSTR charImgName=T2A(strImgName);
+	USES_CONVERSION;
+	LPCSTR charImgName=T2A(strImgName);
 
-	pImgDataset = (GDALDataset *)GDALOpen(strImgName, GA_ReadOnly);
+	pImgDataset = (GDALDataset *)GDALOpen(charImgName, GA_ReadOnly);
 	if( pImgDataset == NULL ) 
 	{
-		//AfxMessageBox(_T("Image " + strImgName + " can't open!"));
 		printf("Img cannot open!");
 		return FALSE;
 	}	
@@ -264,13 +256,13 @@ BOOL  CComBase::OpenImg(BSTR ImgName,int& imgWidth, int& imgHeight,double& dx, d
     //打开DEM影像    
     GDALDataset *pImgDataset=NULL;
 	//此处有改动
-	/*const char* charImgName=(char*)(LPCTSTR)strImgName;*/
-	//USES_CONVERSION;
-	//LPCSTR charImgName=T2A(strImgName);
-	pImgDataset = (GDALDataset *)GDALOpen(strImgName, GA_ReadOnly);
+	//const char* charImgName=(char*)(LPCTSTR)strImgName;
+	USES_CONVERSION;
+	LPCSTR charImgName=T2A(strImgName);
+
+	pImgDataset = (GDALDataset *)GDALOpen(charImgName, GA_ReadOnly);
 	if( pImgDataset == NULL ) 
 	{
-		//AfxMessageBox(_T("Image " + strImgName + " can't open!"));
 		printf("Img cannot open!");
 		return FALSE;
 	}	
@@ -303,10 +295,10 @@ BOOL  CComBase::OpenImg(CString strImgName,int imgWidth, int imgHeight, float *p
     GDALDataset *pImgDataset=NULL;
 	//此处有改动
 	//const char* charImgName=(char*)(LPCTSTR)strImgName;
-	//USES_CONVERSION;
-	//LPCSTR charImgName=T2A(strImgName);
+	USES_CONVERSION;
+	LPCSTR charImgName=T2A(strImgName);
 
-	pImgDataset = (GDALDataset *)GDALOpen(strImgName, GA_ReadOnly);
+	pImgDataset = (GDALDataset *)GDALOpen(charImgName, GA_ReadOnly);
 	if( pImgDataset == NULL ) 
 	{
 		printf("Img cannot open!");
@@ -346,13 +338,12 @@ BOOL  CComBase::OpenImg(BSTR ImgName,int imgWidth, int imgHeight,double& dx, dou
     GDALDataset *pImgDataset=NULL;
 	//此处有改动
 	//const char* charImgName=(char*)(LPCTSTR)strImgName;
-	//USES_CONVERSION;
-	//LPCSTR charImgName=T2A(strImgName);
+	USES_CONVERSION;
+	LPCSTR charImgName=T2A(strImgName);
 
-	pImgDataset = (GDALDataset *)GDALOpen(strImgName, GA_ReadOnly);
+	pImgDataset = (GDALDataset *)GDALOpen(charImgName, GA_ReadOnly);
 	if( pImgDataset == NULL ) 
 	{
-		//AfxMessageBox(_T("Image " + strImgName + " can't open!"));
 		printf("Img cannot open!");
 		return FALSE;
 	}	
@@ -398,13 +389,12 @@ BOOL  CComBase::OpenImg(CString strImgName,int imgWidth, int imgHeight,double& d
     GDALDataset *pImgDataset=NULL;
 	//此处有改动
 	//const char* charImgName=(char*)(LPCTSTR)strImgName;
-	//USES_CONVERSION;
-	//LPCSTR charImgName=T2A(strImgName);
+	USES_CONVERSION;
+	LPCSTR charImgName=T2A(strImgName);
 
-	pImgDataset = (GDALDataset *)GDALOpen(strImgName, GA_ReadOnly);
+	pImgDataset = (GDALDataset *)GDALOpen(charImgName, GA_ReadOnly);
 	if( pImgDataset == NULL ) 
 	{
-		//AfxMessageBox(_T("Image " + strImgName + " can't open!"));
 		printf("Img cannot open!");
 		return FALSE;
 	}	
@@ -442,7 +432,6 @@ BOOL  CComBase::OpenImg(CString strImgName,int imgWidth, int imgHeight,double& d
 //pBuffer —— 返回影像的各个像素值。
 BOOL  CComBase::OpenImg(BSTR ImgName,int imgWidth, int imgHeight,double& dx, double& dy, double& Xmin, double& Ymax, CString& projRef, float *pBuffer)
 {
-	printf("\n 进入openImg.\n");
     CString strImgName(ImgName);
     if (strImgName.GetLength()<1||pBuffer==NULL)
 	{
@@ -454,13 +443,12 @@ BOOL  CComBase::OpenImg(BSTR ImgName,int imgWidth, int imgHeight,double& dx, dou
     GDALDataset *pImgDataset=NULL;
 	//此处有改动
 	//const char* charImgName=(char*)(LPCTSTR)strImgName;
-	//USES_CONVERSION;
-	//LPCSTR charImgName=T2A(strImgName);
+	USES_CONVERSION;
+	LPCSTR charImgName=T2A(strImgName);
 
-	pImgDataset = (GDALDataset *)GDALOpen(strImgName, GA_ReadOnly);
+	pImgDataset = (GDALDataset *)GDALOpen(charImgName, GA_ReadOnly);
 	if( pImgDataset == NULL ) 
 	{
-		//AfxMessageBox(_T("Image " + strImgName + " can't open!"));
 		printf("img cannot open!");
 		return FALSE;
 	}	
@@ -673,4 +661,3 @@ BOOL  CComBase::SaveBMP(CString strImgName, int imgWidth, int imgHeight, BITMAPF
 
 	return TRUE;
 }
-

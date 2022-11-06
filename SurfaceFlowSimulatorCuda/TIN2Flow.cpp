@@ -122,14 +122,16 @@ BOOL TIN2Flow::CreateFlow(CString fin, BSTR InDEM)
 BOOL TIN2Flow::ReadTin(CString fin,std::vector<tin>& tinA,std::vector<node*>& nodeA)
 {
 	//遍历TIN的ShapeFile格式文件中的每一个三角形（线）
-	SHPHandle shpIn=SHPOpen(fin,"rb");
+	USES_CONVERSION;
+	LPCSTR charFin = T2A(fin);
+	SHPHandle shpIn = SHPOpen(charFin, "rb");
 	if (shpIn == NULL)
 	{
 		std::cout<<"Can not open the shpIn file!"<<std::endl;
 		return false;
 	}
 
-    DBFHandle dbfIn = DBFOpen(fin,"rb");
+	DBFHandle dbfIn = DBFOpen(charFin, "rb");
 
 	SHPInfo shpHeader;
 	SHPGetInfo(shpIn,&shpHeader.nRecords,&shpHeader.nShapeType,shpHeader.adBoundsMin,shpHeader.adBoundsMax);
@@ -382,7 +384,7 @@ BOOL TIN2Flow::AddStartNode(std::vector<tin>& tinA, BSTR InDEM, std::vector<node
 //strFirstDayDepth一记录整个区域第一天的水深文件，曼宁公式中用到的水力半径water flow depth
 //inManingIndData一曼宁公式中用到曼宁系数，如N=0.04
 //(outPntXData, outPntYData,outPntZData)—指定的流域出口点的坐标。该流域出口点将加入到构建的每一条流水线的最后一点
-BOOL TIN2Flow::CalFlowPnts(double intelTimeData, std::vector<polyline3D>& polylines, CString strFirstDayDepth, double inManingIndData, float *pTWI, float *pL, float *pC, float *pS, double outPntXData, double outPntYData, double outPntZData)
+BOOL TIN2Flow::CalFlowPnts(double intelTimeData, std::vector<polyline3D>& polylines, CString strFirstDayDepth, double inManingIndData, float *pL, float *pC, float *pS, double outPntXData, double outPntYData, double outPntZData)
 {
 	double slope = 0, velocity = 0;
 
@@ -444,10 +446,10 @@ BOOL TIN2Flow::CalFlowPnts(double intelTimeData, std::vector<polyline3D>& polyli
 				}
 				double dep = (dp0 + dp1) / 2;
 
-				AddOneToPline(pline, pntX0, pntY0, pntZ0, pntX1, pntY1, pntZ1, velocity, lefttime, intelTimeData, dep, inManingIndData, Xmin, Ymax, imgWidth, dx, dy, pTWI, pL, pC, pS);
+				AddOneToPline(pline, pntX0, pntY0, pntZ0, pntX1, pntY1, pntZ1, velocity, lefttime, intelTimeData, dep, inManingIndData, Xmin, Ymax, imgWidth, dx, dy, pL, pC, pS);
+
 			}
 		}
-
 
 		//在一条流水线的最后加入流域出口点,仅当流水线的最后一点离流域出口点小于一定阈值范围才加入该流域出口点
 		point3D lastPnt = pline[pline.size() - 1];
@@ -465,10 +467,12 @@ BOOL TIN2Flow::CalFlowPnts(double intelTimeData, std::vector<polyline3D>& polyli
 //向polylines中增加一条线段(两个点)之间的所有点
 //depth-曼宁公式中用到的水力半径water flow depth
 //inManingInd-曼宁公式中用到的曼宁系数
-void TIN2Flow::AddOneToPline(polyline3D& pline, double X0, double Y0, double Z0, double X1, double Y1, double Z1, double& velocity, double& lefttime, double intelTime, double depth, double inManingInd, double Xmin, double Ymax, int imgWidth, int dx, int dy, float *pTWI, float *pL, float *pC, float *pS)
+void TIN2Flow::AddOneToPline(polyline3D& pline, double X0, double Y0, double Z0, double X1, double Y1, double Z1, double& velocity, double& lefttime, double intelTime, double depth, double inManingInd, double Xmin, double Ymax, int imgWidth, int dx, int dy, float *pL, float *pC, float *pS)
+
 {
 	// 计算该段路程时间。以1秒为单位，确定插入点的个数
-	double t = CalOneLineTime(X0, Y0, Z0, X1, Y1, Z1, velocity, depth, inManingInd, Xmin, Ymax, imgWidth, dx, dy, pTWI, pL, pC, pS);
+	double t = CalOneLineTime(X0, Y0, Z0, X1, Y1, Z1, velocity, depth, inManingInd, Xmin, Ymax, imgWidth, dx, dy, pL, pC, pS);
+
 
 	////test
 	//if (std::isinf(t)) {
@@ -509,26 +513,16 @@ void TIN2Flow::AddOneToPline(polyline3D& pline, double X0, double Y0, double Z0,
 		double Y = Y0 + (Y1 - Y0) * i / t;
 		double Z = Z0 + (Z1 - Z0) * i / t;
 		pline.push_back(point3D(X, Y, Z));
-		//Corrected by W.Q
 		lefttime = t - (int)i;
 	}
-
-	////增加中间的节点
-	////Modify Carol 20200304
-	//for (int i = 1; (i * intelTime) < t; i++) {
-	//	double X = X0 + (X1 - X0) * (i * intelTime / t);
-	//	double Y = Y0 + (Y1 - Y0) * (i * intelTime / t);
-	//	double Z = Z0 + (Z1 - Z0) * (i * intelTime / t);
-
-	//	pline.push_back(point3D(X, Y, Z));
-	//	lefttime = t - i * intelTime;
-	//}
 }
 
 //计算一条线段(两个点)之间的通过时间
 //depth-曼宁公式中用到的水力半径water flow depth
 //inManingInd-曼宁公式中用到的曼宁系数
-double TIN2Flow::CalOneLineTime(double X0, double Y0, double Z0, double X1, double Y1, double Z1, double& velocity, double depth, double inManingInd, double Xmin, double Ymax, int imgWidth, int dx, int dy, float *pTWI, float *pL, float *pC, float *pS)
+//double TIN2Flow::CalOneLineTime(double X0, double Y0, double Z0, double X1, double Y1, double Z1, double& velocity, double depth, double inManingInd, double Xmin, double Ymax, int imgWidth, int dx, int dy, float *pTWI, float *pL, float *pC, float *pS)
+double TIN2Flow::CalOneLineTime(double X0, double Y0, double Z0, double X1, double Y1, double Z1, double& velocity, double depth, double inManingInd, double Xmin, double Ymax, int imgWidth, int dx, int dy, float *pL, float *pC, float *pS)
+
 {
 	if (Z0 < 0) {
 		Z0 = 151.590988;
@@ -544,68 +538,35 @@ double TIN2Flow::CalOneLineTime(double X0, double Y0, double Z0, double X1, doub
 	double Mslope = fabs(Z1 - Z0) / dis;		//曼宁公式中用到的slope
 	Mslope = fabs(Mslope) > 1e-5 ? Mslope : 0;
 
-	////计算指定线段的slope
-	//int nX0s = (X0 - Xmin) / dx;
-	//int nY0s= (Ymax - Y0) / dy;
-	//float Ms0 = *(pS + nY0s*imgWidth + nX0s);
-	//int nX1s = (X1 - Xmin) / dx;
-	//int nY1s = (Ymax - Y1) / dy;
-	//float Ms1 = *(pS + nY1s*imgWidth + nX1s);
-	//float Mslope = (Ms0 + Ms1) / 2;
-
-
-	//计算指定线段的TWI
+	//计算指定线段的L
 	int nX0 = (X0 - Xmin) / dx;
 	int nY0 = (Ymax - Y0) / dy;
-	float Mtwi0 = *(pTWI + nY0*imgWidth + nX0);
+	float Ml0 = *(pL + nY0*imgWidth + nX0);
 	int nX1 = (X1 - Xmin) / dx;
 	int nY1 = (Ymax -Y1) / dy;
-	float Mtwi1 = *(pTWI + nY1*imgWidth + nX1);
-	float Mtwi = (Mtwi0 + Mtwi1) / 2;
-
-	//计算指定线段的L
-	float Ml0 = *(pL + nY0*imgWidth + nX0);
 	float Ml1 = *(pL + nY1*imgWidth + nX1);
 	float Ml = (Ml0 + Ml1) / 2;
 
-	//计算指定线段的C
+	//计算指定线段的C 
 	float Mc0 = *(pC + nY0*imgWidth + nX0);
 	float Mc1 = *(pC + nY1*imgWidth + nX1);
 	float Mc = (Mc0 + Mc1) / 2;
 
-	////TWI,L,C和slope的权重系数(同等重要)
-	//double a = 1;
-	//double b = 1;
-	//double c = 1;
-	//double d = 1;
-
-	//TWI,L,C和slope的权重系数(最大特征值为4.0776，CR为0.0287)
-	double a = 0.0563;
-	double b = 0.1310;
-	double c = 0.2388;
-	double d = 0.5738;
-
-	////TWI,L,C和slope的权重系数(最大特征值为4.2365，CR为0.0876)
-	//double a = 0.0464;
-	//double b = 0.1334;
-	//double c = 0.2667;
-	//double d = 0.5536;
-
-	////TWI,L,C和slope的权重系数(最大特征值为4.2365，CR为0.0876)
-	//double a = 0.0464;
-	//double b = 0.0324;
-	//double c = 0.1222;
-	//double d = 0.7990;
-
 	//计算流速
-	if (Mslope > 0) {			//当坡度不是平地时，重新计算速度
-		if (a * Mtwi + b * Ml - c * fabs(Mc) + d * Mslope < 0) {
-			velocity = M * pow(R, 2.0 / 3.0) * sqrt(Mslope);
+	if (Mslope > 0) 
+	{	
+		//当坡度不是平地时，重新计算速度
+		if (Ml < 0.5)
+		{
+			velocity = M * abs(Mc) * pow(R, 2.0 / 3.0) * sqrt(Mslope);
 		}
-		else {
-			velocity = M * pow(R, 2.0 / 3.0) * sqrt(a * Mtwi + b * Ml - c * fabs(Mc) + d * Mslope);
+		else
+		{
+			velocity = M * (1 / Ml) * abs(Mc) * pow(R, 2.0 / 3.0) * sqrt(Mslope); 
 		}
-	} else {							//当坡度为平地时，速度保持之前的速度
+	} 
+	else		//当坡度为平地时，速度保持之前的速度
+	{							
 		velocity = velocity;
 	}
 	//std::cout << velocity << std::endl;
